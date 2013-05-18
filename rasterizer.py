@@ -1,7 +1,7 @@
 import Polygon, numpy as np, math
 from collections import namedtuple
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 Point = namedtuple('Point', 'x y')
 
 class Rasterizer:
@@ -20,7 +20,7 @@ class Rasterizer:
     def _psi(self, p, e, j, k):
         def psi_1d(p, e):
             if e == 0:   return 1 if 0 <= p < 1 else 0
-            else:        return (1 if 0 <= p < 0.5 else -1) if 0 <= p < 1 else 0 
+            else:        return (1 if 0<=p<0.5 else -1) if 0 <= p < 1 else 0 
         return 2**j * psi_1d(2**j*p.x-k.x, e.x) * psi_1d(2**j*p.y-k.y, e.y)
 
     def _c(self, e, j, k):
@@ -36,13 +36,13 @@ class Rasterizer:
     def _g(self, p):
         s = 0
         E_pi = [Point(0,0), Point(0,1), Point(1,0), Point(1,1)]
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         j = 0
         for kx in xrange(2**j):
             for ky in xrange(2**j):
                 k = Point(kx, ky)
                 s += self._c(E_pi[0], j,k) * self._psi(p, E_pi[0], j,k)
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         max_j = int(math.ceil(math.log(max(w,h), 2)))-1
         for j in xrange(max_j+1):
             for kx in xrange(2**j):
@@ -53,9 +53,10 @@ class Rasterizer:
         return s
 
     def get(self):
-        return np.reshape([self._g(p) for p in self._lattice],(self._w,self._h))
+        px_arr = [self._g(p) for p in self._lattice]
+        return np.reshape(px_arr, (self._w, self._h))
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
     import cv2, time
