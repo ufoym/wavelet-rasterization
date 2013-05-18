@@ -1,4 +1,4 @@
-import Polygon, cv2, numpy as np, time, math
+import Polygon, numpy as np, math
 from collections import namedtuple
 
 # ------------------------------------------------------------------------------
@@ -35,19 +35,20 @@ class Rasterizer:
 
     def _g(self, p):
         s = 0
+        E_pi = [Point(0,0), Point(0,1), Point(1,0), Point(1,1)]
         # ----------------------------------------------------------------------
         j = 0
         for kx in xrange(2**j):
             for ky in xrange(2**j):
                 k = Point(kx, ky)
-                s += self._c(Point(0,0), j,k) * self._psi(p, Point(0,0), j,k)
+                s += self._c(E_pi[0], j,k) * self._psi(p, E_pi[0], j,k)
         # ----------------------------------------------------------------------
-        max_j = int(math.ceil(math.log(max(w,h), 2)))
+        max_j = int(math.ceil(math.log(max(w,h), 2)))-1
         for j in xrange(max_j+1):
             for kx in xrange(2**j):
                 for ky in xrange(2**j):
                     k = Point(kx, ky)
-                    for e in [Point(0,1), Point(1,0), Point(1,1)]:
+                    for e in E_pi[1:]:
                         s += self._c(e, j, k) * self._psi(p, e, j, k)
         return s
 
@@ -57,20 +58,24 @@ class Rasterizer:
 # ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    import cv2, time
+    from random import randint
     w, h, z = 8, 8, 30
-    poly = ((1,2), (w-1,1), (w-1,h-1))
 
-    ts = time.time()
-    raster = Rasterizer(poly, w, h).get()
-    print 'time: %2.1fs' % (time.time()-ts)
+    while True:
+        poly = [(randint(1,w-1), randint(1,w-1)) for i in xrange(3)]
 
-    raster = np.array(np.asarray(raster)*30, np.uint8)
-    raster = cv2.cvtColor(raster, cv2.COLOR_GRAY2BGR)
-    raster = cv2.resize(raster, (w*z,h*z), interpolation = cv2.INTER_NEAREST)
+        ts = time.time()
+        raster = Rasterizer(poly, w, h).get()
+        print '%s\ttime: %2.1fs' % (poly, time.time()-ts)
 
-    poly_vis = np.array([(p[1]*z, p[0]*z) for p in poly])
-    cv2.polylines(raster, [poly_vis],True,(255,255,0),lineType=cv2.CV_AA)
-    cv2.namedWindow('raster')
-    cv2.imshow('raster', raster)
+        raster = np.array(raster*255+0.5, np.uint8)
+        raster = cv2.cvtColor(raster, cv2.COLOR_GRAY2BGR)
+        raster = cv2.resize(raster, (w*z,h*z), interpolation=cv2.INTER_NEAREST)
 
-    cv2.waitKey(0)
+        poly_vis = np.array([(p[1]*z, p[0]*z) for p in poly])
+        cv2.polylines(raster, [poly_vis],True,(255,255,0),lineType=cv2.CV_AA)
+        cv2.namedWindow('raster')
+        cv2.imshow('raster', raster)
+
+        cv2.waitKey(0)
