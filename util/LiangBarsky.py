@@ -2,6 +2,25 @@ from collections import namedtuple
 Point = namedtuple('Point', 'x y')
 
 def LiangBarsky(left, right, bottom, top, start, end):
+    """
+    Parameters
+    ----------
+    left, right, bottom, top : numeric
+        Input numerics that defines the x/y clipping values for the border.
+    start, end : Point
+        Input two points that defines the line segment to be clipped.
+
+    Returns
+    -------
+    clipped_start, clipped_end : Point
+        Output two points that defines the clipped line segment.
+        Raise Exception if no clipped line exists.
+
+    References
+    ----------
+        http://www.skytopia.com/project/articles/compsci/clipping.html
+
+    """
     t0, t1 = 0, 1
     xdelta = end.x-start.x
     ydelta = end.y-start.y
@@ -9,7 +28,7 @@ def LiangBarsky(left, right, bottom, top, start, end):
         if   edge == 0:   p, q = -xdelta, -(left-start.x) 
         elif edge == 1:   p, q =  xdelta,  (right-start.x)
         elif edge == 2:   p, q =  ydelta,  (bottom-start.y)
-        elif edge == 3:   p, q = -ydelta, -(top-start.y) 
+        elif edge == 3:   p, q = -ydelta, -(top-start.y)
         r = q / float(p)
         if p == 0 and q < 0:    raise Exception('no line')
         if p < 0:
@@ -48,4 +67,4 @@ if __name__ == '__main__':
             pass
         cv2.namedWindow('result')
         cv2.imshow('result', vis)
-        cv2.waitKey(0)
+        cv2.waitKey(100)
