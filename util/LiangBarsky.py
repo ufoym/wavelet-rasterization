@@ -29,12 +29,13 @@ def LiangBarsky(left, right, bottom, top, start, end):
         elif edge == 1:   p, q =  xdelta,  (right-start.x)
         elif edge == 2:   p, q =  ydelta,  (bottom-start.y)
         elif edge == 3:   p, q = -ydelta, -(top-start.y)
-        r = q / float(p)
         if p == 0 and q < 0:    raise Exception('no line')
         if p < 0:
+            r = q / float(p)
             if r > t1:          raise Exception('no line')
             elif r > t0:        t0 = r   # line is clipped!
         elif p > 0:
+            r = q / float(p)
             if r < t0:          raise Exception('no line')
             elif r < t1:        t1 = r   # line is clipped!
     clipped_start = Point(start.x + t0*xdelta, start.y + t0*ydelta)
@@ -67,4 +68,4 @@ if __name__ == '__main__':
             pass
         cv2.namedWindow('result')
         cv2.imshow('result', vis)
-        cv2.waitKey(100)
+        cv2.waitKey(0)
