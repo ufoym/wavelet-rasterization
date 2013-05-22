@@ -36,6 +36,8 @@ class Rasterizer:
             end = transform(_end)
             try:   
                 v1, v0 = LiangBarsky(0, 1, 1, 0, start, end)
+                if v0.x == 1 and v1.x == 1 or v0.y == 1 and v1.y == 1:
+                    return Point(0,0), Point(0,0)                    
             except:
                 return Point(0,0), Point(0,0)
             # compute K, L
