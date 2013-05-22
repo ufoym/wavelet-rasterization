@@ -32,16 +32,11 @@ class Rasterizer:
             def transform(p):
                 return Point(2**(j+1)*p[0]-k.x*2-Q.x, 
                              2**(j+1)*p[1]-k.y*2-Q.y)
-            # print _start, _end, k,j
             start = transform(_start)
             end = transform(_end)
-            # print '+++++', start, end
             try:   
                 v1, v0 = LiangBarsky(0, 1, 1, 0, start, end)
-                # print 'v1, v0 : ', v1, v0
-                # print '------------'
             except:
-                print start, end, j, k
                 return Point(0,0), Point(0,0)
             # compute K, L
             K = Point(0.25 * (v0.y-v1.y), 
@@ -87,8 +82,6 @@ class Rasterizer:
                 for ky in xrange(2**j):
                     k = Point(kx, ky)
                     self._all_c[(j,k)] = self._c(j, k)
-        for k, v in sorted(self._all_c.iteritems()):
-            print k, v
 
     def _g(self, p):
         s = 0
@@ -113,10 +106,6 @@ class Rasterizer:
 
     def get(self):
         px_arr = [self._g(p) for p in self._lattice]
-        for i in xrange(8):
-            for j in xrange(8):
-                print '%2.2f' % px_arr[i*8+j], 
-            print
         return np.reshape(px_arr, (self._w, self._h))
 
 # -----------------------------------------------------------------------------
@@ -126,12 +115,14 @@ if __name__ == '__main__':
     from random import randint
     w, h, z = 8, 8, 30
 
+    def area(poly):
+        return 0.5 * sum(x0*y1 - x1*y0 \
+            for ((x0, y0), (x1, y1)) in zip(poly, poly[1:] + [poly[0]]))
+
     while True:
         poly = [(randint(1,w-1), randint(1,w-1)) for i in xrange(3)]
-        poly = [(6, 3), (7, 5), (4, 6)]
-        poly = [(1.9, 1.9), (1.9, h-1.9), (w-1.9, h-1.9), (w-1.9, 1.9)]
-        poly = [(1.9, 1.9), (6.1, 1.9), (6.1, 6.1), (1.9, 6.1)]
-        poly = [(1.1, 1.1), (6.1, 1.1), (6.1, 6.1), (2, 6.1)]
+        if area(poly) < 0:
+            continue
 
         ts = time.time()
         raster = Rasterizer(poly, w, h).get()
