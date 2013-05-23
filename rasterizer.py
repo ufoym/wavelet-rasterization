@@ -21,7 +21,7 @@ class Rasterizer:
         self._lattice = [Point(*normalize((x,y))) \
                         for x in xrange(self._wh) for y in xrange(self._wh)]
         self._valid_lattice = [Point(*normalize((x,y))) \
-                        for x in xrange(w) for y in xrange(h)]
+                        for x in xrange(h) for y in xrange(w)]
         # prepare all c
         self._all_c = {}
         for j in xrange(self._max_j+1):
@@ -98,10 +98,10 @@ class Rasterizer:
 if __name__ == '__main__':
     import cv2, time, numpy as np
     from random import randint
-    w, h, z = 20, 20, 10
+    w, h, z = 13, 17, 30
 
     while True:
-        poly = [(randint(1,w-1), randint(1,w-1)) for i in xrange(3)]
+        poly = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
         if area(poly) < 0:
             continue
 
