@@ -15,7 +15,16 @@ def find_intersections(left, right, bottom, top, bez):
         pt = eval_cubic_bezier(bez, t)
         return left-eps <=pt[0]<= right+eps and top-eps <=pt[1]<= bottom+eps
     def find_cubic_root(a, b, c, d=None):
+        ''' 
+        solve ax^3 + bx^2 + cx + d = 0 
+
+        reference
+        =========
+            http://www.physics.rutgers.edu/~masud
+            /computing/WPark_recipes_in_python.html
+        '''
         def quadratic(a, b, c=None):
+            ''' solve ax^2 + bx + c = 0 '''
             if c:   a, b = b / float(a), c / float(a)
             t = a / 2.0
             r = t**2 - b
@@ -29,8 +38,12 @@ def find_intersections(left, right, bottom, top, bez):
         def polar(x, y, deg=0):     # radian if deg=0; degree if deg=1
             if deg:     return math.hypot(x,y), 180.0 * math.atan2(y,x)/math.pi
             else:       return math.hypot(x,y), math.atan2(y,x)
+        if a == 0:
+            y1, y2 = quadratic(b, c, d)
+            return y1, y2, None
+        a = float(a)
         if d:           # (ax^3 + bx^2 + cx + d = 0)
-            a, b, c = b / float(a), c / float(a), d / float(a)
+            a, b, c = b / a, c / a, d / a
         t = a / 3.0
         p, q = b - 3 * t**2, c - b * t + 2 * t**3
         u, v = quadratic(q, -(p/3.0)**3)
@@ -67,6 +80,7 @@ if __name__ == '__main__':
                         randint(0,w-1),randint(0,h-1), 
                         randint(0,w-1),randint(0,h-1), 
                         randint(0,w-1),randint(0,h-1))
+        print bezier
         ts = np.linspace(0,1, num=50)
         for start, end in zip(ts[:-1], ts[1:]):
             sx, sy = eval_cubic_bezier(bezier, start)
@@ -85,4 +99,4 @@ if __name__ == '__main__':
 
         cv2.namedWindow('raster')
         cv2.imshow('raster', vis[:,:,:3])
-        cv2.waitKey(2000)
+        cv2.waitKey(100)
