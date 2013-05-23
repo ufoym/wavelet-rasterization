@@ -10,18 +10,21 @@ def area(poly):
 class Rasterizer:
 
     def __init__(self, poly, w, h):
-        def normalize(p):
-            return (p[0]/float(w), p[1]/float(h))
         self._w = w
         self._h = h
+        self._max_j = int(math.ceil(math.log(max(w,h), 2)))-1
+        self._wh = 2 ** (self._max_j+1)
+        def normalize(p):
+            return (p[0]/float(self._wh), p[1]/float(self._wh))
         self._poly = [normalize(p) for p in poly]
         self._area = area(self._poly)
         self._lattice = [Point(*normalize((x,y))) \
+                        for x in xrange(self._wh) for y in xrange(self._wh)]
+        self._valid_lattice = [Point(*normalize((x,y))) \
                         for x in xrange(w) for y in xrange(h)]
         # prepare all c
         self._all_c = {}
-        max_j = int(math.ceil(math.log(max(w,h), 2)))-1
-        for j in xrange(max_j+1):
+        for j in xrange(self._max_j+1):
             for kx in xrange(2**j):
                 for ky in xrange(2**j):
                     k = Point(kx, ky)
@@ -72,8 +75,7 @@ class Rasterizer:
     def _g(self, p):
         s = self._area
         E = [Point(0,1), Point(1,0), Point(1,1)]
-        max_j = int(math.ceil(math.log(max(w,h), 2)))-1
-        for j in xrange(max_j+1):
+        for j in xrange(self._max_j+1):
             for kx in xrange(2**j):
                 for ky in xrange(2**j):
                     k = Point(kx, ky)
@@ -87,8 +89,8 @@ class Rasterizer:
         return s
 
     def get(self):
-        px_arr = [self._g(p) for p in self._lattice]
-        px_mat = [px_arr[i*w : (i+1)*w] for i in xrange(h)]
+        px_arr = [self._g(p) for p in self._valid_lattice]
+        px_mat = [px_arr[i*self._w : (i+1)*self._w] for i in xrange(self._h)]
         return px_mat
 
 # -----------------------------------------------------------------------------
@@ -96,7 +98,7 @@ class Rasterizer:
 if __name__ == '__main__':
     import cv2, time, numpy as np
     from random import randint
-    w, h, z = 8, 8, 30
+    w, h, z = 20, 20, 10
 
     while True:
         poly = [(randint(1,w-1), randint(1,w-1)) for i in xrange(3)]
@@ -116,4 +118,4 @@ if __name__ == '__main__':
         cv2.namedWindow('raster')
         cv2.imshow('raster', raster)
 
-        cv2.waitKey(0)
+        cv2.waitKey(100)
