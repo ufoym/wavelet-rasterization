@@ -10,20 +10,17 @@ def eval_cubic_bezier(bez, t):
             bez.y0*(1-t)**3 + 3*bez.y1*(1-t)**2*t \
             + 3*bez.y2*(1-t)*t**2 + bez.y3*t**3)
 
-def find_intersection(left, right, bottom, top, bez):
+def find_intersections(left, right, bottom, top, bez):
     def is_t_in(t, eps = 1e-5):
         pt = eval_cubic_bezier(bez, t)
         return left-eps <=pt[0]<= right+eps and top-eps <=pt[1]<= bottom+eps
     def find_cubic_root(a, b, c, d=None):
         def quadratic(a, b, c=None):
-            if c:       # (ax^2 + bx + c = 0)
-                a, b = b / float(a), c / float(a)
+            if c:   a, b = b / float(a), c / float(a)
             t = a / 2.0
             r = t**2 - b
-            if r >= 0:      # real roots
-                y1 = math.sqrt(r)
-            else:       # complex roots
-                y1 = cmath.sqrt(r)
+            if r >= 0:  y1 = math.sqrt(r)
+            else:       y1 = cmath.sqrt(r)
             y2 = -y1
             return y1 - t, y2 - t
         def cbrt(x):
@@ -59,21 +56,10 @@ def find_intersection(left, right, bottom, top, bez):
 
 
 if __name__ == '__main__':
-    import cv2, numpy as np, cairo
+    import cv2, numpy as np
     from random import randint
-    Color = namedtuple('Color', 'r g b')
-    w, h = 300, 300
+    w, h = 500, 500
     rect = (int(w*0.25), int(h*0.25), int(w*0.75), int(h*0.75))
-    color = Color(255, 0, 0)
-
-    def rasterize(img, bezier, color, w, h, alpha = 1.0):
-        surface = cairo.ImageSurface.create_for_data(img, 
-            cairo.FORMAT_ARGB32,w,h)
-        cr = cairo.Context(surface)
-        cr.move_to(*bezier[:2])
-        cr.curve_to(*bezier[2:])
-        cr.set_source_rgba(color.r/255., color.g/255., color.b/255., alpha)
-        cr.stroke()
 
     while True:
         vis = np.zeros((h,w,4), np.uint8)
@@ -81,13 +67,22 @@ if __name__ == '__main__':
                         randint(0,w-1),randint(0,h-1), 
                         randint(0,w-1),randint(0,h-1), 
                         randint(0,w-1),randint(0,h-1))
-        rasterize(vis, bezier, color, w, h)
+        ts = np.linspace(0,1, num=50)
+        for start, end in zip(ts[:-1], ts[1:]):
+            sx, sy = eval_cubic_bezier(bezier, start)
+            ex, ey = eval_cubic_bezier(bezier, end)
+            cv2.line(vis, (int(sx), int(sy)), (int(ex), int(ey)), 
+                (0,0,255), 2, cv2.CV_AA)
         cv2.rectangle(vis, rect[:2], rect[2:], (255,0,0))
 
-        for t in find_intersection(rect[0], rect[2], rect[3], rect[1], bezier):
+        ts = find_intersections(rect[0],rect[2],rect[3],rect[1], bezier)
+        for i, t in enumerate(ts):
             x, y = eval_cubic_bezier(bezier, t)
-            cv2.circle(vis, (int(x), int(y)), 2, (255,255,0))
+            cv2.circle(vis, (int(x), int(y)), 2, (255,0,255), 2)
+            cv2.putText(vis,'%d' % i, (int(x)+3, int(y)), 
+                cv2.FONT_HERSHEY_PLAIN, 1.0, (0,255,0))
+        cv2.circle(vis, bezier[:2], 2, (0,0,255), 5)
 
         cv2.namedWindow('raster')
         cv2.imshow('raster', vis[:,:,:3])
-        cv2.waitKey(0)
+        cv2.waitKey(2000)
