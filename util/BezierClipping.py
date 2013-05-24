@@ -25,6 +25,9 @@ def find_intersections(left, right, bottom, top, bez):
         '''
         def quadratic(a, b, c=None):
             ''' solve ax^2 + bx + c = 0 '''
+            if a == 0:
+                if b == 0:  return None, None
+                else:       return -c/float(b), None
             if c:   a, b = b / float(a), c / float(a)
             t = a / 2.0
             r = t**2 - b
