@@ -1,6 +1,5 @@
-import math, cmath
+import numpy as np
 from collections import namedtuple
-from sympy import roots
 
 # -----------------------------------------------------------------------------
 Bezier = namedtuple('Bezier', 'x0 y0 x1 y1 x2 y2 x3 y3')
@@ -15,20 +14,27 @@ def find_intersections(left, right, bottom, top, bez):
     def is_t_in(t, eps = 1e-5):
         pt = evaluate(bez, t)
         return left-eps <=pt[0]<= right+eps and top-eps <=pt[1]<= bottom+eps
-    def find_cubic_root(a, b, c, d):
-        return roots('%f*x**3 + %f*x**2 + %f*x + %f' % (a, b, c, d)).keys()
+
+    def find_cubic_real_root(a, b, c, d, eps = 1e-6):
+        '''solve ax^3 + bx^2 + cx + d = 0'''
+        results = []
+        for r in np.roots([a, b, c, d]):
+            if type(r) == np.complex128:
+                if abs(r.imag) < eps:   results.append(r.real)
+            else:                       results.append(r)
+        return results
+
     ax, bx = -bez.x0+3*bez.x1-3*bez.x2+bez.x3, 3*bez.x0-6*bez.x1+3*bez.x2
     cx, _dx = 3*bez.x1-3*bez.x0, bez.x0
     ay, by = -bez.y0+3*bez.y1-3*bez.y2+bez.y3, 3*bez.y0-6*bez.y1+3*bez.y2
     cy, _dy = 3*bez.y1-3*bez.y0, bez.y0
     ts = [0]
-    ts += find_cubic_root(ax, bx, cx, _dx-left)
-    ts += find_cubic_root(ax, bx, cx, _dx-right)
-    ts += find_cubic_root(ay, by, cy, _dy-bottom)
-    ts += find_cubic_root(ay, by, cy, _dy-top)
+    ts += find_cubic_real_root(ax, bx, cx, _dx-left)
+    ts += find_cubic_real_root(ax, bx, cx, _dx-right)
+    ts += find_cubic_real_root(ay, by, cy, _dy-bottom)
+    ts += find_cubic_real_root(ay, by, cy, _dy-top)
     ts.append(1)
-    intersections = [t for t in ts if t is not None \
-                    and type(t) != complex and 0 <= t <= 1 and is_t_in(t)]
+    intersections = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
     return sorted(intersections)
 
 def subsection(bez, t0, t1):
