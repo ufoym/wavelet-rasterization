@@ -4,7 +4,7 @@ from collections import namedtuple
 # -----------------------------------------------------------------------------
 Bezier = namedtuple('Bezier', 'x0 y0 x1 y1 x2 y2 x3 y3')
 
-def eval_cubic_bezier(bez, t):
+def evaluate(bez, t):
     return (bez.x0*(1-t)**3 + 3*bez.x1*(1-t)**2*t \
             + 3*bez.x2*(1-t)*t**2 + bez.x3*t**3,
             bez.y0*(1-t)**3 + 3*bez.y1*(1-t)**2*t \
@@ -12,7 +12,7 @@ def eval_cubic_bezier(bez, t):
 
 def find_intersections(left, right, bottom, top, bez):
     def is_t_in(t, eps = 1e-5):
-        pt = eval_cubic_bezier(bez, t)
+        pt = evaluate(bez, t)
         return left-eps <=pt[0]<= right+eps and top-eps <=pt[1]<= bottom+eps
     def find_cubic_root(a, b, c, d=None):
         ''' 
@@ -63,15 +63,21 @@ def find_intersections(left, right, bottom, top, bez):
     cx, _dx = 3*bez.x1-3*bez.x0, bez.x0
     ay, by = -bez.y0+3*bez.y1-3*bez.y2+bez.y3, 3*bez.y0-6*bez.y1+3*bez.y2
     cy, _dy = 3*bez.y1-3*bez.y0, bez.y0
-    ts = []
+    ts = [0]
     ts += find_cubic_root(ax, bx, cx, _dx-left)
     ts += find_cubic_root(ax, bx, cx, _dx-right)
     ts += find_cubic_root(ay, by, cy, _dy-bottom)
     ts += find_cubic_root(ay, by, cy, _dy-top)
+    ts.append(1)
     intersections = [t for t in ts if t is not None \
                     and type(t) != complex and 0 <= t <= 1 and is_t_in(t)]
     return sorted(intersections)
 
+def clip(left, right, bottom, top, bez):
+    intersections = find_intersections(left, right, bottom, top, bez)
+    if len(intersections) > 0:
+        intersections = [intersections[0], intersections[-1]]
+    return [evaluate(bezier, t) for t in intersections]
 
 if __name__ == '__main__':
     import cv2, numpy as np
@@ -88,15 +94,15 @@ if __name__ == '__main__':
         print bezier
         ts = np.linspace(0,1, num=50)
         for start, end in zip(ts[:-1], ts[1:]):
-            sx, sy = eval_cubic_bezier(bezier, start)
-            ex, ey = eval_cubic_bezier(bezier, end)
+            sx, sy = evaluate(bezier, start)
+            ex, ey = evaluate(bezier, end)
             cv2.line(vis, (int(sx), int(sy)), (int(ex), int(ey)), 
                 (0,0,255), 2, cv2.CV_AA)
         cv2.rectangle(vis, rect[:2], rect[2:], (255,0,0))
 
-        ts = find_intersections(rect[0],rect[2],rect[3],rect[1], bezier)
-        for i, t in enumerate(ts):
-            x, y = eval_cubic_bezier(bezier, t)
+        pts = clip(rect[0],rect[2],rect[3],rect[1], bezier)
+        for i, pt in enumerate(pts):
+            x, y = pt
             cv2.circle(vis, (int(x), int(y)), 2, (255,0,255), 2)
             cv2.putText(vis,'%d' % i, (int(x)+3, int(y)), 
                 cv2.FONT_HERSHEY_PLAIN, 1.0, (0,255,0))
@@ -104,4 +110,4 @@ if __name__ == '__main__':
 
         cv2.namedWindow('raster')
         cv2.imshow('raster', vis[:,:,:3])
-        cv2.waitKey(100)
+        cv2.waitKey(0)
