@@ -23,13 +23,16 @@ def find_intersections(left, right, bottom, top, bez):
             http://www.physics.rutgers.edu/~masud
             /computing/WPark_recipes_in_python.html
         '''
-        def quadratic(a, b, c=None):
+        def quadratic(a, b, c=None, eps = 1e-4):
             ''' solve x^2 + ax + b = 0  (or ax^2 + bx + c = 0) '''
             if a == 0:
                 if c:
                     if b == 0:  return None, None
                     else:       return -c/float(b), None
-                else:           return None, None
+                else:
+                    if b <= 0:  return (-b)**.5, -(-b)**.5
+                    elif b<eps: return 0, 0
+                    else:       return None, None
             if c:   a, b = b / float(a), c / float(a)
             t = a / 2.0
             r = t**2 - b
