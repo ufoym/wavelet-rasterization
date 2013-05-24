@@ -73,11 +73,33 @@ def find_intersections(left, right, bottom, top, bez):
                     and type(t) != complex and 0 <= t <= 1 and is_t_in(t)]
     return sorted(intersections)
 
+def subsection(bez, t0, t1):
+    u0 = 1.0 - t0
+    u1 = 1.0 - t1
+
+    qxa = bez.x0*u0*u0 + bez.x1*2*t0*u0 + bez.x2*t0*t0
+    qxb = bez.x0*u1*u1 + bez.x1*2*t1*u1 + bez.x2*t1*t1
+    qxc = bez.x1*u0*u0 + bez.x2*2*t0*u0 + bez.x3*t0*t0
+    qxd = bez.x1*u1*u1 + bez.x2*2*t1*u1 + bez.x3*t1*t1
+
+    qya = bez.y0*u0*u0 + bez.y1*2*t0*u0 + bez.y2*t0*t0
+    qyb = bez.y0*u1*u1 + bez.y1*2*t1*u1 + bez.y2*t1*t1
+    qyc = bez.y1*u0*u0 + bez.y2*2*t0*u0 + bez.y3*t0*t0
+    qyd = bez.y1*u1*u1 + bez.y2*2*t1*u1 + bez.y3*t1*t1
+
+    sec = Bezier(   qxa*u0 + qxc*t0, qya*u0 + qyc*t0,
+                    qxa*u1 + qxc*t1, qya*u1 + qyc*t1,
+                    qxb*u0 + qxd*t0, qyb*u0 + qyd*t0,
+                    qxb*u1 + qxd*t1, qyb*u1 + qyd*t1 )
+    return sec
+
 def clip(left, right, bottom, top, bez):
     intersections = find_intersections(left, right, bottom, top, bez)
-    if len(intersections) > 0:
-        intersections = [intersections[0], intersections[-1]]
-    return [evaluate(bezier, t) for t in intersections]
+    if len(intersections) == 0:
+        return None
+    else:
+        t0, t1 = intersections[0], intersections[-1]
+        return subsection(bez, t0, t1)
 
 if __name__ == '__main__':
     import cv2, numpy as np
@@ -100,14 +122,16 @@ if __name__ == '__main__':
                 (0,0,255), 2, cv2.CV_AA)
         cv2.rectangle(vis, rect[:2], rect[2:], (255,0,0))
 
-        pts = clip(rect[0],rect[2],rect[3],rect[1], bezier)
-        for i, pt in enumerate(pts):
-            x, y = pt
-            cv2.circle(vis, (int(x), int(y)), 2, (255,0,255), 2)
-            cv2.putText(vis,'%d' % i, (int(x)+3, int(y)), 
-                cv2.FONT_HERSHEY_PLAIN, 1.0, (0,255,0))
+        sec = clip(rect[0],rect[2],rect[3],rect[1], bezier)
+        if sec:
+            for start, end in zip(ts[:-1], ts[1:]):
+                sx, sy = evaluate(sec, start)
+                ex, ey = evaluate(sec, end)
+                cv2.line(vis, (int(sx), int(sy)), (int(ex), int(ey)), 
+                    (0,255,255), 3, cv2.CV_AA)
+            cv2.circle(vis, bezier[:2], 2, (0,255,255), 5)
         cv2.circle(vis, bezier[:2], 2, (0,0,255), 5)
 
         cv2.namedWindow('raster')
         cv2.imshow('raster', vis[:,:,:3])
-        cv2.waitKey(0)
+        cv2.waitKey(1)
