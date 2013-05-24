@@ -24,10 +24,12 @@ def find_intersections(left, right, bottom, top, bez):
             /computing/WPark_recipes_in_python.html
         '''
         def quadratic(a, b, c=None):
-            ''' solve ax^2 + bx + c = 0 '''
+            ''' solve x^2 + ax + b = 0  (or ax^2 + bx + c = 0) '''
             if a == 0:
-                if b == 0:  return None, None
-                else:       return -c/float(b), None
+                if c:
+                    if b == 0:  return None, None
+                    else:       return -c/float(b), None
+                else:           return None, None
             if c:   a, b = b / float(a), c / float(a)
             t = a / 2.0
             r = t**2 - b
