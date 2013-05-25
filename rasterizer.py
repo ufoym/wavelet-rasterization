@@ -6,7 +6,8 @@ Point = collections.namedtuple('Point', 'x y')
 def area(polybez):
     def det(a, b):  return a[0] * b[1] - a[1] * b[0]
     s = 0
-    for i, v3 in enumerate(polybez[::3]):
+    for i in xrange(0, len(polybez), 3):
+        v3 = polybez[i]
         v2 = polybez[i-1]
         v1 = polybez[i-2]
         v0 = polybez[i-3]
@@ -85,7 +86,8 @@ class Rasterizer:
         Q_00, Q_01 = Point(0, 0), Point(0, 1)
         Q_10, Q_11 = Point(1, 0), Point(1, 1)
         c10, c01, c11 = 0, 0, 0
-        for i, v1 in enumerate(self._polybez[::3]):
+        for i in xrange(0, len(self._polybez), 3):
+            v1 = self._polybez[i]
             b1 = self._polybez[i-1]
             b0 = self._polybez[i-2]
             v0 = self._polybez[i-3]
@@ -134,6 +136,7 @@ if __name__ == '__main__':
         polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
         if area(polybez) < 0:
             continue
+        polybez = [(0,0),(h/2,0),(h,w/2),(h,w), (h/2,w),(0,w/2)]
 
         ts = time.time()
         raster = Rasterizer(polybez, w, h).get()
@@ -144,7 +147,8 @@ if __name__ == '__main__':
         raster = cv2.resize(raster, (w*z,h*z), interpolation=cv2.INTER_NEAREST)
 
         tts = np.linspace(0,1, num=50)
-        for i, v3 in enumerate(polybez[::3]):
+        for i in xrange(0, len(polybez), 3):
+            v3 = polybez[i]
             v2 = polybez[i-1]
             v1 = polybez[i-2]
             v0 = polybez[i-3]
@@ -152,9 +156,9 @@ if __name__ == '__main__':
             for start, end in zip(tts[:-1], tts[1:]):
                 sx, sy = evaluate(bezier, start)
                 ex, ey = evaluate(bezier, end)
-                cv2.line(raster, (int(sx*z),int(sy*z)), (int(ex*z),int(ey*z)), 
+                cv2.line(raster, (int(sy*z),int(sx*z)), (int(ey*z),int(ex*z)), 
                     (0,0,255), 2, cv2.CV_AA)
         cv2.namedWindow('raster')
         cv2.imshow('raster', raster)
 
-        cv2.waitKey(100)
+        cv2.waitKey(0)
