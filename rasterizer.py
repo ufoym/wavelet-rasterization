@@ -130,7 +130,7 @@ if __name__ == '__main__':
         polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
         if area(polybez) < 0:
             continue
-        polybez = [(0,0),(h,0),(0,w)]
+        polybez = [(1,1),(h,0),(0,w)]
 
         ts = time.time()
         raster = Rasterizer(polybez, w, h).get()

@@ -10,7 +10,7 @@ def evaluate(bez, t):
             bez.y0*(1-t)**3 + 3*bez.y1*(1-t)**2*t \
             + 3*bez.y2*(1-t)*t**2 + bez.y3*t**3)
 
-def find_intersections(left, right, bottom, top, bez):
+def clip(left, right, bottom, top, bez):
     def is_t_in(t, eps = 1e-5):
         pt = evaluate(bez, t)
         return left-eps <=pt[0]<= right+eps and top-eps <=pt[1]<= bottom+eps
@@ -24,6 +24,26 @@ def find_intersections(left, right, bottom, top, bez):
             else:                       results.append(r)
         return results
 
+    def subsection(bez, t0, t1):
+        u0 = 1.0 - t0
+        u1 = 1.0 - t1
+
+        qxa = bez.x0*u0*u0 + bez.x1*2*t0*u0 + bez.x2*t0*t0
+        qxb = bez.x0*u1*u1 + bez.x1*2*t1*u1 + bez.x2*t1*t1
+        qxc = bez.x1*u0*u0 + bez.x2*2*t0*u0 + bez.x3*t0*t0
+        qxd = bez.x1*u1*u1 + bez.x2*2*t1*u1 + bez.x3*t1*t1
+
+        qya = bez.y0*u0*u0 + bez.y1*2*t0*u0 + bez.y2*t0*t0
+        qyb = bez.y0*u1*u1 + bez.y1*2*t1*u1 + bez.y2*t1*t1
+        qyc = bez.y1*u0*u0 + bez.y2*2*t0*u0 + bez.y3*t0*t0
+        qyd = bez.y1*u1*u1 + bez.y2*2*t1*u1 + bez.y3*t1*t1
+
+        sec = Bezier(   qxa*u0 + qxc*t0, qya*u0 + qyc*t0,
+                        qxa*u1 + qxc*t1, qya*u1 + qyc*t1,
+                        qxb*u0 + qxd*t0, qyb*u0 + qyd*t0,
+                        qxb*u1 + qxd*t1, qyb*u1 + qyd*t1 )
+        return sec
+
     ax, bx = -bez.x0+3*bez.x1-3*bez.x2+bez.x3, 3*bez.x0-6*bez.x1+3*bez.x2
     cx, _dx = 3*bez.x1-3*bez.x0, bez.x0
     ay, by = -bez.y0+3*bez.y1-3*bez.y2+bez.y3, 3*bez.y0-6*bez.y1+3*bez.y2
@@ -36,36 +56,11 @@ def find_intersections(left, right, bottom, top, bez):
     ts.append(1)
     ts = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
     ts = sorted(ts)
-    intersections = [t for i, t in enumerate(ts) if t != ts[i-1]]
-    return intersections
-
-def subsection(bez, t0, t1):
-    u0 = 1.0 - t0
-    u1 = 1.0 - t1
-
-    qxa = bez.x0*u0*u0 + bez.x1*2*t0*u0 + bez.x2*t0*t0
-    qxb = bez.x0*u1*u1 + bez.x1*2*t1*u1 + bez.x2*t1*t1
-    qxc = bez.x1*u0*u0 + bez.x2*2*t0*u0 + bez.x3*t0*t0
-    qxd = bez.x1*u1*u1 + bez.x2*2*t1*u1 + bez.x3*t1*t1
-
-    qya = bez.y0*u0*u0 + bez.y1*2*t0*u0 + bez.y2*t0*t0
-    qyb = bez.y0*u1*u1 + bez.y1*2*t1*u1 + bez.y2*t1*t1
-    qyc = bez.y1*u0*u0 + bez.y2*2*t0*u0 + bez.y3*t0*t0
-    qyd = bez.y1*u1*u1 + bez.y2*2*t1*u1 + bez.y3*t1*t1
-
-    sec = Bezier(   qxa*u0 + qxc*t0, qya*u0 + qyc*t0,
-                    qxa*u1 + qxc*t1, qya*u1 + qyc*t1,
-                    qxb*u0 + qxd*t0, qyb*u0 + qyd*t0,
-                    qxb*u1 + qxd*t1, qyb*u1 + qyd*t1 )
-    return sec
-
-def clip(left, right, bottom, top, bez):
-    intersections = find_intersections(left, right, bottom, top, bez)
-    if len(intersections) == 0:
-        return []
-    else:
-        return [subsection(bez, intersections[i-1], intersections[i]) \
-                for i in xrange(1, len(intersections), 2)]
+    ts = [t for i, t in enumerate(ts) if t != ts[i-1]]
+    pairs = [(ts[i-1], t) for i, t in enumerate(ts) \
+                if i > 0 and is_t_in((t + ts[i-1]) * 0.5)]
+    sections = [subsection(bez, a, b) for a, b in pairs]
+    return sections
 
 if __name__ == '__main__':
     import cv2, numpy as np
