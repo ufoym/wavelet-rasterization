@@ -60,10 +60,10 @@ def subsection(bez, t0, t1):
 def clip(left, right, bottom, top, bez):
     intersections = find_intersections(left, right, bottom, top, bez)
     if len(intersections) == 0:
-        return None
+        return []
     else:
-        t0, t1 = intersections[0], intersections[-1]
-        return subsection(bez, t0, t1)
+        return [subsection(bez, intersections[i-1], intersections[i]) \
+                for i in xrange(1, len(intersections), 2)]
 
 if __name__ == '__main__':
     import cv2, numpy as np
@@ -86,8 +86,7 @@ if __name__ == '__main__':
                 (0,0,255), 2, cv2.CV_AA)
         cv2.rectangle(vis, rect[:2], rect[2:], (255,0,0))
 
-        sec = clip(rect[0],rect[2],rect[3],rect[1], bezier)
-        if sec:
+        for sec in clip(rect[0],rect[2],rect[3],rect[1], bezier):
             for start, end in zip(ts[:-1], ts[1:]):
                 sx, sy = evaluate(sec, start)
                 ex, ey = evaluate(sec, end)
