@@ -126,13 +126,12 @@ if __name__ == '__main__':
     import cv2, time, numpy as np
     from random import randint
     from util.BezierClipping import evaluate
-    w, h, z = 4, 4, 30
+    w, h, z = 17, 13, 30
 
     while True:
-        polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
+        polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(6)]
         if area(polybez) < 0:
             continue
-        polybez = [(1, 1), (1, 3), (1, 4)]
 
         ts = time.time()
         raster = Rasterizer(polybez, w, h).get()
@@ -157,4 +156,4 @@ if __name__ == '__main__':
         cv2.namedWindow('raster')
         cv2.imshow('raster', raster)
 
-        cv2.waitKey(0)
+        cv2.waitKey(1)
