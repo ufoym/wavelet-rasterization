@@ -45,7 +45,7 @@ class Rasterizer:
         return 2**j * psi_1d(2**j*p.x-k.x, e.x) * psi_1d(2**j*p.y-k.y, e.y)
 
     def _c(self, j, k):
-        def get_KL(_start, b0, b1, _end, Q):
+        def get_KL(_start, b0, b1, _end, Q, eps = 1e-5):
             def transform(p):
                 return Point(2**(j+1)*p[0]-k.x*2-Q.x, 
                              2**(j+1)*p[1]-k.y*2-Q.y)
@@ -60,8 +60,10 @@ class Rasterizer:
                 v2 = Point(sec.x1, sec.y1)
                 v1 = Point(sec.x2, sec.y2)
                 v0 = Point(sec.x3, sec.y3)
-                if v0.x == 1 and v1.x == 1 and v2.x == 1 and v3.x == 1\
-                or v0.y == 1 and v1.y == 1 and v2.y == 1 and v3.y == 1:
+                if abs(v0.x - 1) < eps and abs(v1.x - 1) < eps \
+                    and abs(v2.x - 1) < eps and abs(v3.x - 1) < eps\
+                or abs(v0.y - 1) < eps and abs(v1.y - 1) < eps \
+                    and abs(v2.y - 1) < eps and abs(v3.y - 1) < eps:
                     continue
 
                 Kx += 1./4 * (v0.y - v3.y)
@@ -124,13 +126,13 @@ if __name__ == '__main__':
     import cv2, time, numpy as np
     from random import randint
     from util.BezierClipping import evaluate
-    w, h, z = 13, 17, 30
+    w, h, z = 4, 4, 30
 
     while True:
         polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
         if area(polybez) < 0:
             continue
-        polybez = [(1,1),(h,0),(0,w)]
+        polybez = [(1, 1), (1, 3), (1, 4)]
 
         ts = time.time()
         raster = Rasterizer(polybez, w, h).get()
