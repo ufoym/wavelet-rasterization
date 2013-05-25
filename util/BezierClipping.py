@@ -34,8 +34,10 @@ def find_intersections(left, right, bottom, top, bez):
     ts += find_cubic_real_root(ay, by, cy, _dy-bottom)
     ts += find_cubic_real_root(ay, by, cy, _dy-top)
     ts.append(1)
-    intersections = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
-    return sorted(intersections)
+    ts = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
+    ts = sorted(ts)
+    intersections = [t for i, t in enumerate(ts) if t != ts[i-1]]
+    return intersections
 
 def subsection(bez, t0, t1):
     u0 = 1.0 - t0

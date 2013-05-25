@@ -54,35 +54,29 @@ class Rasterizer:
             b0x, b0y = transform(b0)
             b1x, b1y = transform(b1)
             bezier = Bezier(sx,sy, b0x,b0y, b1x,b1y, ex,ey)
-            try:   
-                sec = clip(0, 1, 1, 0, bezier)
-                if sec is None:
-                    return Point(0,0), Point(0,0)                    
-                else:
-                    v3 = Point(sec.x0, sec.y0)
-                    v2 = Point(sec.x1, sec.y1)
-                    v1 = Point(sec.x2, sec.y2)
-                    v0 = Point(sec.x3, sec.y3)
+            Kx, Ky, Lx, Ly = 0, 0, 0, 0
+            for sec in clip(0, 1, 1, 0, bezier):
+                v3 = Point(sec.x0, sec.y0)
+                v2 = Point(sec.x1, sec.y1)
+                v1 = Point(sec.x2, sec.y2)
+                v0 = Point(sec.x3, sec.y3)
                 if v0.x == 1 and v1.x == 1 and v2.x == 1 and v3.x == 1\
                 or v0.y == 1 and v1.y == 1 and v2.y == 1 and v3.y == 1:
-                    return Point(0,0), Point(0,0)                    
-            except:
-                return Point(0,0), Point(0,0)
-            # compute K, L
+                    continue
 
-            K = Point(1./4 * (v0.y - v3.y), 
-                      1./4 * (v3.x - v0.x))
-            L = Point(1./80* (6 * v2.y*v3.x + 3 * v1.y*(v2.x+v3.x) \
+                Kx += 1./4 * (v0.y - v3.y)
+                Ky += 1./4 * (v3.x - v0.x)
+                Lx += 1./80* (6 * v2.y*v3.x + 3 * v1.y*(v2.x+v3.x) \
                             + v0.y * (6*v1.x+3*v2.x+v3.x) \
                             - 6 * v2.x*v3.y - 3 * v1.x*(v2.y+v3.y) \
                             - 10 * v3.x*v3.y \
-                            + v0.x * (10*v0.y-6*v1.y-3*v2.y-v3.y) ),
-                      1./80* (6 * v2.y*v3.x + 3 * v1.y*(v2.x+v3.x) \
+                            + v0.x * (10*v0.y-6*v1.y-3*v2.y-v3.y) )
+                Ly += 1./80* (6 * v2.y*v3.x + 3 * v1.y*(v2.x+v3.x) \
                             + v0.y * (6*v1.x+3*v2.x+v3.x) \
                             - 6 * v2.x*v3.y - 3 * v1.x*(v2.y+v3.y) \
                             + 10 * v3.x*v3.y \
-                            - v0.x * (10*v0.y+6*v1.y+3*v2.y+v3.y) ) )
-            return K, L
+                            - v0.x * (10*v0.y+6*v1.y+3*v2.y+v3.y) )
+            return Point(Kx, Ky), Point(Lx, Ly)
         Q_00, Q_01 = Point(0, 0), Point(0, 1)
         Q_10, Q_11 = Point(1, 0), Point(1, 1)
         c10, c01, c11 = 0, 0, 0
@@ -136,7 +130,7 @@ if __name__ == '__main__':
         polybez = [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)]
         if area(polybez) < 0:
             continue
-        polybez = [(0,0),(h/2,0),(h,w/2),(h,w), (h/2,w),(0,w/2)]
+        polybez = [(0,0),(h,0),(0,w)]
 
         ts = time.time()
         raster = Rasterizer(polybez, w, h).get()
