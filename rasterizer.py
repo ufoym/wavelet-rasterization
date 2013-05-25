@@ -4,8 +4,8 @@ from util.LiangBarsky import LiangBarsky
 # -----------------------------------------------------------------------------
 Point = collections.namedtuple('Point', 'x y')
 def area(poly):
-    return 0.5 * sum(x0*y1 - x1*y0 \
-        for ((x0, y0), (x1, y1)) in zip(poly, poly[1:] + [poly[0]]))
+    def det(a, b):  return a[0] * b[1] - a[1] * b[0]
+    return 0.5 * sum(det(a, b) for (a, b) in zip(poly, poly[1:] + [poly[0]]))
 
 class Rasterizer:
 
