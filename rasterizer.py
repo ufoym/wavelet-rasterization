@@ -1,6 +1,9 @@
 import math, copy
-from Line import Point, Contour
+from collections import namedtuple
+from contour import *
 
+# -----------------------------------------------------------------------------
+Point = namedtuple('Point', 'x y')
 # -----------------------------------------------------------------------------
 
 class Rasterizer:
@@ -79,7 +82,8 @@ if __name__ == '__main__':
     w, h, z = 17, 13, 50
 
     while True:
-        contour = Contour([(randint(1,h-1),randint(1,w-1)) for i in xrange(3)])
+        contour = CubicBezier.Contour(
+            [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)])
         if contour.area() < 0:
             continue
 
