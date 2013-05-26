@@ -1,5 +1,5 @@
 import math, copy
-from CubicBezier import Point, Contour, get_KL
+from Line import Point, Contour, get_KL
 
 # -----------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     w, h, z = 17, 13, 30
 
     while True:
-        contour = Contour([(randint(1,h-1),randint(1,w-1)) for i in xrange(6)])
+        contour = Contour([(randint(1,h-1),randint(1,w-1)) for i in xrange(3)])
         if contour.area() < 0:
             continue
 
