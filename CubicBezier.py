@@ -103,33 +103,29 @@ class CubicBezier:
 class Contour:
 
     def __init__(self, contour):
-        self._contour = contour
+        self.contour = contour
 
     def __str__(self):
-        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self._contour)
+        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
 
     def process(self, method):
-        self._contour = [method(p) for p in self._contour]
+        self.contour = [method(p) for p in self.contour]
 
     def area(self):
         def det(a, b):  return a[0] * b[1] - a[1] * b[0]
         s = 0
-        for i in xrange(0, len(self._contour), 3):
-            v3 = self._contour[i]
-            v2 = self._contour[i-1]
-            v1 = self._contour[i-2]
-            v0 = self._contour[i-3]
+        for v0, v1, v2, v3 in self.each():
             s += 3./10 * det(v0,v1) + 3./20 * det(v1,v2) + 3./10 * det(v2,v3) \
                + 3./20 * det(v0,v2) + 3./20 * det(v1,v3) + 1./20 * det(v0,v3)
         return s
 
     def each(self): 
-        for i in xrange(0, len(self._contour), 3):
-            v1 = self._contour[i]
-            b1 = self._contour[i-1]
-            b0 = self._contour[i-2]
-            v0 = self._contour[i-3]
-            yield (v0, b0, b1, v1)
+        for i in xrange(0, len(self.contour), 3):
+            v3 = self.contour[i]
+            v2 = self.contour[i-1]
+            v1 = self.contour[i-2]
+            v0 = self.contour[i-3]
+            yield v0, v1, v2, v3
 
     def to_lines(self):
         tts = np.linspace(0,1, num=50)
@@ -141,8 +137,8 @@ class Contour:
                 ex, ey = bezier.evaluate(end)
                 yield sx, sy, ex, ey
 
+    def get_KL(self, section):
+        bezier = CubicBezier(*section)
+        return bezier.get_KL()
+
 # -----------------------------------------------------------------------------
-        
-def get_KL(section):
-    bezier = CubicBezier(*section)
-    return bezier.get_KL()

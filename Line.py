@@ -52,30 +52,30 @@ class Line:
 class Contour:
 
     def __init__(self, contour):
-        self._contour = contour
+        self.contour = contour
 
     def __str__(self):
-        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self._contour)
+        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
 
     def process(self, method):
-        self._contour = [method(p) for p in self._contour]
+        self.contour = [method(p) for p in self.contour]
 
     def area(self):
         def det(a, b):  return a[0] * b[1] - a[1] * b[0]
         return 0.5 * sum(det(a, b) for (a, b) in \
-            zip(self._contour, self._contour[1:] + [self._contour[0]]))
+            zip(self.contour, self.contour[1:] + [self.contour[0]]))
 
     def each(self): 
-        for i, v1 in enumerate(self._contour):
-            v0 = self._contour[i-1]
+        for i, v1 in enumerate(self.contour):
+            v0 = self.contour[i-1]
             yield v0, v1
 
     def to_lines(self):
         for v0, v1 in self.each():
             yield v0[0], v0[1], v1[0], v1[1]
+            
+    def get_KL(self, section):
+        line = Line(*section)
+        return line.get_KL()
 
 # -----------------------------------------------------------------------------
-        
-def get_KL(section):
-    line = Line(*section)
-    return line.get_KL()
