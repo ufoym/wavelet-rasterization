@@ -1,6 +1,5 @@
 import math, copy
 from collections import namedtuple
-from contour import *
 
 # -----------------------------------------------------------------------------
 Point = namedtuple('Point', 'x y')
@@ -75,29 +74,3 @@ class Rasterizer:
         return px_mat
 
 # -----------------------------------------------------------------------------
-
-if __name__ == '__main__':
-    import cv2, time, numpy as np
-    from random import randint
-    w, h, z = 17, 13, 50
-
-    while True:
-        contour = CubicBezier.Contour(
-            [(randint(1,h-1), randint(1,w-1)) for i in xrange(3)])
-        if contour.area() < 0:
-            continue
-
-        ts = time.time()
-        raster = Rasterizer(contour, w, h).get()
-        print '%s\ttime: %2.1fs' % (contour, time.time()-ts)
-
-        raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
-        raster = cv2.cvtColor(raster, cv2.COLOR_GRAY2BGR)
-        raster = cv2.resize(raster, (w*z,h*z), interpolation=cv2.INTER_NEAREST)
-        for sx, sy, ex, ey in contour.to_lines():
-            cv2.line(raster, (int(sy*z),int(sx*z)), (int(ey*z),int(ex*z)), 
-                (0,0,255), 2, cv2.CV_AA)
-        cv2.namedWindow('raster')
-        cv2.imshow('raster', raster)
-
-        cv2.waitKey(1)

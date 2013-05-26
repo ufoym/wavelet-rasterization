@@ -106,7 +106,8 @@ class Contour:
         self.contour = contour
 
     def __str__(self):
-        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        info = ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        return ' :\t'.join(['CubicBezier', info])
 
     def process(self, method):
         self.contour = [method(p) for p in self.contour]

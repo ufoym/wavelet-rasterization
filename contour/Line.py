@@ -55,7 +55,8 @@ class Contour:
         self.contour = contour
 
     def __str__(self):
-        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        info = ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        return ' :\t'.join(['Line', info])
 
     def process(self, method):
         self.contour = [method(p) for p in self.contour]
@@ -73,7 +74,7 @@ class Contour:
     def to_lines(self):
         for v0, v1 in self.each():
             yield v0[0], v0[1], v1[0], v1[1]
-            
+
     def get_KL(self, section):
         line = Line(*section)
         return line.get_KL()

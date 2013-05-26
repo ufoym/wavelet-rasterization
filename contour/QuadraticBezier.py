@@ -88,7 +88,8 @@ class Contour:
         self.contour = contour
 
     def __str__(self):
-        return ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        info = ' '.join('(%2.1f, %2.1f)' % (s[0], s[1]) for s in self.contour)
+        return ' :\t'.join(['QuadraticBezier', info])
 
     def process(self, method):
         self.contour = [method(p) for p in self.contour]
@@ -116,7 +117,7 @@ class Contour:
                 sx, sy = bezier.evaluate(start)
                 ex, ey = bezier.evaluate(end)
                 yield sx, sy, ex, ey
-                
+
     def get_KL(self, section):
         bezier = QuadraticBezier(*section)
         return bezier.get_KL()
