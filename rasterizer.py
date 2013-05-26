@@ -74,3 +74,22 @@ class Rasterizer:
         return px_mat
 
 # -----------------------------------------------------------------------------
+
+if __name__ == '__main__':
+    import cv2, numpy as np
+    from contour import *
+
+    contour = Line.Contour([(2,2), (15,3), (5,7)])
+    raster = Rasterizer(contour, 16, 16).get()
+    raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
+    cv2.imwrite('var/Line.png', raster)
+
+    contour = QuadraticBezier.Contour([(2,2), (14,2), (14,14), (2,14)])
+    raster = Rasterizer(contour, 16, 16).get()
+    raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
+    cv2.imwrite('var/QuadraticBezier.png', raster)
+
+    contour = CubicBezier.Contour([(2,2),(6,2),(14,6),(14,14),(6,14),(2,6)])
+    raster = Rasterizer(contour, 16, 16).get()
+    raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
+    cv2.imwrite('var/CubicBezier.png', raster)
