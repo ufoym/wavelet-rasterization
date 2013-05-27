@@ -23,8 +23,7 @@ class Rasterizer:
         for j in xrange(self.max_j+1):
             for kx in xrange(2**j):
                 for ky in xrange(2**j):
-                    k = Point(kx, ky)
-                    self.all_c[(j,k)] = self.c(j, k)
+                    self.all_c[(j, kx,ky)] = self.c(j, (kx,ky))
 
     def psi(self, p, e, j, k):
         def psi_1d(p, e):
@@ -59,7 +58,7 @@ class Rasterizer:
             for kx in xrange(2**j):
                 for ky in xrange(2**j):
                     k = Point(kx, ky)
-                    cs = self.all_c[(j,k)]
+                    cs = self.all_c[(j, kx,ky)]
                     for i, e in enumerate(E):
                         psi = self.psi(p, e, j, k)
                         if psi > 0:     s += cs[i]
@@ -74,9 +73,8 @@ class Rasterizer:
             exp_jpx, exp_jpy = exp_j*p.x, exp_j*p.y
             for kx in xrange(exp_j):
                 for ky in xrange(exp_j):
-                    k = Point(kx, ky)
-                    cs = self.all_c[(j,k)]
-                    exp_jpkx, exp_jpky = exp_jpx-k.x, exp_jpy-k.y
+                    cs = self.all_c[(j,kx,ky)]
+                    exp_jpkx, exp_jpky = exp_jpx-kx, exp_jpy-ky
                     if exp_jpkx < 0 or exp_jpkx >= 1:     continue
                     if exp_jpky < 0 or exp_jpky >= 1:     continue
                     for i, e in enumerate(E):
@@ -96,20 +94,22 @@ class Rasterizer:
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    import cv2, numpy as np
+    import cv2, numpy as np,time
     from contour import *
 
-    contour = Line.Contour([(4,4), (30,6), (10,14)])
+    ts = time.time()
+    contour= Line.Contour([(4,4), (30,6), (10,14)])
     raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/Line.png', raster)
 
-    contour = QuadraticBezier.Contour([(4,4), (28,4), (28,28), (4,28)])
+    contour= QuadraticBezier.Contour([(4,4), (28,4), (28,28), (4,28)])
     raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/QuadraticBezier.png', raster)
 
-    contour = CubicBezier.Contour([(4,4),(12,4),(28,12),(28,28),(12,28),(4,12)])
+    contour= CubicBezier.Contour([(4,4),(12,4),(28,12),(28,28),(12,28),(4,12)])
     raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/CubicBezier.png', raster)
+    print time.time() - ts
