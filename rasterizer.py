@@ -62,10 +62,8 @@ class Rasterizer:
                     cs = self.all_c[(j,k)]
                     for i, e in enumerate(E):
                         psi = self.psi(p, e, j, k)
-                        if psi > 0: sign = 1
-                        elif psi < 0: sign = -1
-                        else: sign = 0
-                        s += cs[i] * sign
+                        if psi > 0:     s += cs[i]
+                        elif psi < 0:   s -= cs[i]
         return s
 
     def get(self):
@@ -79,17 +77,17 @@ if __name__ == '__main__':
     import cv2, numpy as np
     from contour import *
 
-    contour = Line.Contour([(2,2), (15,3), (5,7)])
-    raster = Rasterizer(contour, 16, 16).get()
+    contour = Line.Contour([(4,4), (30,6), (10,14)])
+    raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/Line.png', raster)
 
-    contour = QuadraticBezier.Contour([(2,2), (14,2), (14,14), (2,14)])
-    raster = Rasterizer(contour, 16, 16).get()
+    contour = QuadraticBezier.Contour([(4,4), (28,4), (28,28), (4,28)])
+    raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/QuadraticBezier.png', raster)
 
-    contour = CubicBezier.Contour([(2,2),(6,2),(14,6),(14,14),(6,14),(2,6)])
-    raster = Rasterizer(contour, 16, 16).get()
+    contour = CubicBezier.Contour([(4,4),(12,4),(28,12),(28,28),(12,28),(4,12)])
+    raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/CubicBezier.png', raster)
