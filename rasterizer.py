@@ -72,11 +72,12 @@ class Rasterizer:
             exp_j = 2**j
             exp_jpx, exp_jpy = exp_j*p.x, exp_j*p.y
             for kx in xrange(exp_j):
+                exp_jpkx = exp_jpx-kx
+                if exp_jpkx < 0 or exp_jpkx >= 1:     continue
                 for ky in xrange(exp_j):
+                    exp_jpky = exp_jpy-ky
+                    if exp_jpky < 0 or exp_jpky >= 1: continue
                     cs = self.all_c[(j,kx,ky)]
-                    exp_jpkx, exp_jpky = exp_jpx-kx, exp_jpy-ky
-                    if exp_jpkx < 0 or exp_jpkx >= 1:     continue
-                    if exp_jpky < 0 or exp_jpky >= 1:     continue
                     for i, e in enumerate(E):
                         neg_x = exp_jpkx >= 0.5 and e.x != 0
                         neg_y = exp_jpky >= 0.5 and e.y != 0
@@ -98,18 +99,18 @@ if __name__ == '__main__':
     from contour import *
 
     ts = time.time()
-    contour= Line.Contour([(4,4), (30,6), (10,14)])
-    raster = Rasterizer(contour, 32, 32).get()
+    contour= Line.Contour([(8,8), (60,12), (20,28)])
+    raster = Rasterizer(contour, 64, 64).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/Line.png', raster)
 
-    contour= QuadraticBezier.Contour([(4,4), (28,4), (28,28), (4,28)])
-    raster = Rasterizer(contour, 32, 32).get()
+    contour= QuadraticBezier.Contour([(8,8), (56,8), (56,56), (8,56)])
+    raster = Rasterizer(contour, 64, 64).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/QuadraticBezier.png', raster)
 
-    contour= CubicBezier.Contour([(4,4),(12,4),(28,12),(28,28),(12,28),(4,12)])
-    raster = Rasterizer(contour, 32, 32).get()
+    contour= CubicBezier.Contour([(8,8),(12,8),(56,24),(56,56),(24,56),(8,24)])
+    raster = Rasterizer(contour, 64, 64).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/CubicBezier.png', raster)
     print time.time() - ts
