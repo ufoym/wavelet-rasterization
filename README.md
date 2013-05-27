@@ -5,7 +5,7 @@ Wavelet rasterization is a method for analytically calculating an anti-aliased r
 
 Manson, Josiah, and Scott Schaefer. **"Wavelet rasterization."** Computer Graphics Forum. Vol. 30. No. 2. Blackwell Publishing Ltd, 2011.
 
-This is a python implementation of the algorithm. Currently it support three types of contours:
+This is a python implementation of the algorithm. Currently it supports three types of contours:
 * Polygon
 * Quadratic Bezier Contour
 * Cubic Bezier Contour
@@ -28,14 +28,25 @@ An example session could like:
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/Line.png', raster)
 
-    ## rasterize a quadratic bezier contour
+Assuming everything is working OK, the examples should generate the following image:
+
+![line](https://f.cloud.github.com/assets/2270240/566747/b1a74248-c69e-11e2-9e24-caeb750c022c.png)
+
+You can also rasterize a quadratic bezier contour:
+
     contour = QuadraticBezier.Contour([(2,2), (14,2), (14,14), (2,14)])
     raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/QuadraticBezier.png', raster)
+
+![quadraticbezier](https://f.cloud.github.com/assets/2270240/566748/b4ee7994-c69e-11e2-8c16-70a536267660.png)
+
+or a cubic bezier contour:
 
     ## rasterize a cubic bezier contour
     contour = CubicBezier.Contour([(2,2),(6,2),(14,6),(14,14),(6,14),(2,6)])
     raster = Rasterizer(contour, 32, 32).get()
     raster = np.array(np.asarray(raster)*255+0.5, np.uint8)
     cv2.imwrite('var/CubicBezier.png', raster)
+
+![cubicbezier](https://f.cloud.github.com/assets/2270240/566749/b6c4ca20-c69e-11e2-9f0a-782a8a74eb66.png)
