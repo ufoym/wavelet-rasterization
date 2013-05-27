@@ -66,8 +66,30 @@ class Rasterizer:
                         elif psi < 0:   s -= cs[i]
         return s
 
+    def g_fast(self, p):
+        s = self.area
+        E = (Point(0,1), Point(1,0), Point(1,1))
+        for j in xrange(self.max_j+1):
+            exp_j = 2**j
+            exp_jpx, exp_jpy = exp_j*p.x, exp_j*p.y
+            for kx in xrange(exp_j):
+                for ky in xrange(exp_j):
+                    k = Point(kx, ky)
+                    cs = self.all_c[(j,k)]
+                    exp_jpkx, exp_jpky = exp_jpx-k.x, exp_jpy-k.y
+                    if exp_jpkx < 0 or exp_jpkx >= 1:     continue
+                    if exp_jpky < 0 or exp_jpky >= 1:     continue
+                    for i, e in enumerate(E):
+                        neg_x = exp_jpkx >= 0.5 and e.x != 0
+                        neg_y = exp_jpky >= 0.5 and e.y != 0
+                        if neg_x and not neg_y or not neg_x and neg_y: 
+                            s -= cs[i]
+                        else:   
+                            s += cs[i]
+        return s
+
     def get(self):
-        px_arr = [self.g(p) for p in self.lattice]
+        px_arr = [self.g_fast(p) for p in self.lattice]
         px_mat = [px_arr[i*self.w : (i+1)*self.w] for i in xrange(self.h)]
         return px_mat
 
