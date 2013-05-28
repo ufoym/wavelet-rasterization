@@ -1,5 +1,6 @@
 import numpy as np
 from collections import namedtuple
+from util.solver import cubic
 
 # -----------------------------------------------------------------------------
 Point = namedtuple('Point', 'x y')
@@ -42,15 +43,6 @@ class CubicBezier:
             pt = self.evaluate(t)
             return left-eps<=pt[0]<=right+eps and top-eps<=pt[1]<=bottom+eps
 
-        def find_cubic_real_root(a, b, c, d, eps = 1e-6):
-            '''solve ax^3 + bx^2 + cx + d = 0'''
-            results = []
-            for r in np.roots([a, b, c, d]):
-                if type(r) == np.complex128:
-                    if abs(r.imag) < eps:   results.append(r.real)
-                else:                       results.append(r)
-            return results
-
         ax = -self.x0 + 3*self.x1 - 3*self.x2 + self.x3
         bx = 3*self.x0 - 6*self.x1 + 3*self.x2
         cx, _dx = 3*self.x1 - 3*self.x0, self.x0
@@ -58,10 +50,10 @@ class CubicBezier:
         by = 3*self.y0 - 6*self.y1 + 3*self.y2
         cy, _dy = 3*self.y1 - 3*self.y0, self.y0
         ts = [0]
-        ts += find_cubic_real_root(ax, bx, cx, _dx-left)
-        ts += find_cubic_real_root(ax, bx, cx, _dx-right)
-        ts += find_cubic_real_root(ay, by, cy, _dy-bottom)
-        ts += find_cubic_real_root(ay, by, cy, _dy-top)
+        ts += cubic(ax, bx, cx, _dx-left)
+        ts += cubic(ax, bx, cx, _dx-right)
+        ts += cubic(ay, by, cy, _dy-bottom)
+        ts += cubic(ay, by, cy, _dy-top)
         ts.append(1)
         ts = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
         ts = sorted(ts)

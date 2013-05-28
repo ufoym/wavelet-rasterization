@@ -1,5 +1,6 @@
 from ctypes import *
- 
+import os
+os.environ['PATH'] = os.path.dirname(__file__) + ';' + os.environ['PATH']
 api = CDLL('solver.dll')
 
 def linear(a, b):
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     print cubic(2,-4,-22, 24) # [4, -3, 1]
     print cubic(3,-10,14, 27) # [-1]
     print cubic(1, 6, 12,  8) # [-2]
-    
+
     eps = 1e-9
     ts = time.time()
     for i in xrange(1000000):

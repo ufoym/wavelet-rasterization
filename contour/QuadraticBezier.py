@@ -1,5 +1,6 @@
 import numpy as np
 from collections import namedtuple
+from util.solver import quadric
 
 # -----------------------------------------------------------------------------
 Point = namedtuple('Point', 'x y')
@@ -33,15 +34,6 @@ class QuadraticBezier:
             pt = self.evaluate(t)
             return left-eps<=pt[0]<=right+eps and top-eps<=pt[1]<=bottom+eps
 
-        def find_quadratic_root(a, b, c, eps = 1e-6):
-            '''solve ax^2 + bx + c = 0'''
-            results = []
-            for r in np.roots([a, b, c]):
-                if type(r) == np.complex128:
-                    if abs(r.imag) < eps:   results.append(r.real)
-                else:                       results.append(r)
-            return results
-
         ax = self.x0 - 2*self.x1 + self.x2
         bx = -2*self.x0 + 2*self.x1
         _cx = self.x0
@@ -49,10 +41,10 @@ class QuadraticBezier:
         by = -2*self.y0 + 2*self.y1
         _cy = self.y0
         ts = [0]
-        ts += find_quadratic_root(ax, bx, _cx-left)
-        ts += find_quadratic_root(ax, bx, _cx-right)
-        ts += find_quadratic_root(ay, by, _cy-bottom)
-        ts += find_quadratic_root(ay, by, _cy-top)
+        ts += quadric(ax, bx, _cx-left)
+        ts += quadric(ax, bx, _cx-right)
+        ts += quadric(ay, by, _cy-bottom)
+        ts += quadric(ay, by, _cy-top)
         ts.append(1)
         ts = [t for t in ts if 0 <= t <= 1 and is_t_in(t)]
         ts = sorted(ts)
