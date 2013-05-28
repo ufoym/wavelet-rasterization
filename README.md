@@ -1,6 +1,7 @@
 Wavelet Rasterization
 =====================
-
+Introduction
+------------
 Wavelet rasterization is a method for analytically calculating an anti-aliased rasterization of arbitrary polygons or shape bounded by Bezier curves. For more details, please read the following paper:
 
 Manson, Josiah, and Scott Schaefer. **"Wavelet rasterization."** Computer Graphics Forum. Vol. 30. No. 2. Blackwell Publishing Ltd, 2011.
@@ -10,12 +11,16 @@ This is a python implementation of the algorithm. Currently it supports three ty
 * Quadratic Bezier Contour
 * Cubic Bezier Contour
 
+Usage
+-----
 Rasterizing these contours are very simple:
 
 1. create a specific `Contour` object (`Line.Contour`, `QuadraticBezier.Contour`, or `CubicBezier.Contour`)
 2. use this contour to construct a `Rasterizer` object
 3. call the method `get()` of the `Rasterizer` object, you get an array of pixels, each of which has a value range from 0 to 1 that indicates the local transparent of the shape.
 
+Example
+-------
 An example session could like:
 
     import cv2, numpy as np             # for image IO
