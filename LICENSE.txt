@@ -1,0 +1,1 @@
+The images, executables, and code supplied are from the web page http://josiahmanson.com. These materials are free to use for non-commercial purposes. Any works that use materials from this web page should acknowledge Josiah Manson and the paper Wavelet Rasterization. For commercial use, please contact Josiah Manson (josiahmanson@gmail.com). 
