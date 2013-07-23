@@ -4,7 +4,6 @@
 #include "write_grid.h"
 #include "timer.h"
 #include "vect.h"
-#include "get_font.h"
 #include "save.h"
 #include <algorithm>
 
@@ -329,15 +328,4 @@ int main(int argc, char **argv)
 		raster_star(depth, poly_res, .45, .45);
 	else if (method == "sp")
 		raster_spiral(depth, poly_res, 10000);
-	else if (method == "f")
-	{
-		vect2d times;
-		times = 0;
-
-		for (char c = 33; c < 127; c++)
-			get_font(font, c, px, &times);
-
-		printf("time to raster with FT   = %f\n", times[0]);
-		printf("time to raster with Ours = %f\n", times[1]);
-	}
 }

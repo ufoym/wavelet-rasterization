@@ -31,3 +31,5 @@ pip-log.txt
 
 *.*sdf
 *.vcxproj*
+*.suo
+Release
